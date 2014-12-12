@@ -1,0 +1,15 @@
+<div ng-app="tasks">
+  <div ng-controller="mainController">
+    <form name="formTasks" ng-submit="addTask()">
+      <input type="text" name="newTask" ng-model="newTask" required />
+      <button ng-disabled="formTasks.$invalid">Add</button>
+    </form>
+    <button ng-click="clearCompleted()">Clear completed</button>
+    <ul>
+      <li ng-repeat="task in tasks">
+        <input type="checkbox" ng-model="task.done" />
+        <span ng-class="{'done':task.done}"> {{task.description}} </span>
+      </li>
+    </ul>
+  </div>
+</div>
