@@ -5,6 +5,7 @@ class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable,
          :recoverable, :validatable
 
+  has_many :tasks
   def self.authenticate(username, password)
     return nil if username.nil? || password.nil?
     user = User.find_for_authentication(:email => username)
