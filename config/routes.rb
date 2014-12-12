@@ -1,13 +1,15 @@
 Rails.application.routes.draw do
-  get 'dummy/index'
-
+  devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations'} 
+  resources :users # workaround to avoid some errors after creating users
+  get 'helper/index'
+  get 'token' => 'helper#token' 
   resources :tasks
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
   # You can have the root of your site routed with "root"
-  root 'dummy#index'
+  root 'helper#index'
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
