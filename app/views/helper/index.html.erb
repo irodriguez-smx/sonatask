@@ -1,14 +1,27 @@
 <div ng-app="tasks">
   <div ng-controller="mainController">
-    <form name="formTasks" ng-submit="addTask()">
-      <input type="text" name="newTask" ng-model="newTask" required />
+    <form name="formTasks" ng-submit="addTask()" >
+      <input placeholder="Description" type="text" name="newTask" ng-model="newTask.description" required />
+      <input placeholder="Expiration date" ui-date="dateOptions" ng-model="newTask.expDate" />
+      <tags-input ng-model="newTask.tags"></tags-input>
       <button ng-disabled="formTasks.$invalid">Add</button>
     </form>
     <button ng-click="clearCompleted()">Clear completed</button>
-    <ul>
-      <li ng-repeat="task in tasks">
-        <input type="checkbox" ng-model="task.done" />
-        <span ng-class="{'done':task.done}"> {{task.description}} </span>
+    <ul ui-sortable="sortableOptions" ng-model="tasks">
+      <li ng-repeat="task in tasks"  ng-init="show = false; editing= false"  ng-mouseenter="show=true" ng-mouseleave="show=false; editing=false;updateTask(task)">
+      <input type="checkbox" ng-model="task.status" ng-click="updateTask(task)" ng-checked="task.status" />
+        <span ng-show="editing">
+          <input type="text" ng-enter="editing=false;updateTask(task)" ng-model="task.description" />
+        </span>
+        <span ng-hide="editing">
+          <span ng-class="{'done':task.status}">
+            {{task.description}}
+          </span>
+          <span ng-show="show"><a href="" ng-click="editing=true;$apply();">edit</a></span>
+          <span ng-show="show"><a href="" ng-click="deleteTask(task)">delete</a></span>
+          <tags-input id="tags{{task.id}}" ng-model="task.tags" on-tag-added="updateTask(task)" on-tag-removed="updateTask(task)"></tags-input> 
+        </span>
+
       </li>
     </ul>
   </div>

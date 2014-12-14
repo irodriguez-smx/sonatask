@@ -17,4 +17,10 @@ class ApplicationController < ActionController::Base
       end
     end
   end
+
+  def json_api_response
+    respond_to do |format|
+      format.json { render json: @response, :status => @response[:status] }
+    end
+  end
 end

@@ -4,28 +4,48 @@ class TasksController < ApplicationController
   def create
     description = params[:description]
     if not description.nil?
-      task = Task.create(task_params)
+      user = User.find(params[:user_id])
+      task = user.tasks.create(task_params)
       task.user = current_user
       task.save!
-      res = {:status=>200, :msg=>'task created succesfully', :task=>task}
+      @response = {:status=>200, :msg=>'task created successfully', :task=>task}
     else
-      res = {:status=>400, :errors=> 'Not description specified'}
+      @response = {:status=>400, :errors=> 'Not description specified'}
     end
-    respond_to do |format|
-      format.json { render json: res, :status => 200 }
-    end
+    json_api_response
   end
 
+  def update
+    task =  Task.find(params[:id])
+    task.update_attributes(task_params)
+    @response = {:status=>200, :msg=>'task updated successfully',:task=>task}
+    json_api_response
+  end
+
+  def destroy
+    task = Task.find(params[:id])
+    task.destroy!
+    @response = {:status=>200, :method=>'delete',:msg=>'task has been deleted successfully'}
+    json_api_response
+  end 
+
   def index
-    tasks = Task.where(:user_id=> current_user.id)
-    res = {:status=> 200, :tasks=>tasks}
-    respond_to do |format|
-      format.json { render json: res, :status => res[:status] }
+    user = User.find(params[:user_id])
+    @response = {:status=> 200, :tasks=>user.tasks}
+    json_api_response
+  end
+
+  def sort
+    params[:tasks].each_with_index do |obj, index|
+      #puts "id: #{obj["id"]} and index: #{index}"
+      Task.where(:id=>obj["id"]).update_all(:position=>(index+1))
     end
+    @response = {:status=>200, :msg=>"tasks have been sorted successfully"}
+    json_api_response
   end
 
   private
   def task_params
-    params.permit(:description)
+    params.permit(:description,:status,:expiration,{:tags=>[]})
   end
 end
