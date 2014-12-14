@@ -4,9 +4,10 @@ class TasksController < ApplicationController
   def create
     description = params[:description]
     if not description.nil?
-      user = User.find(params[:user_id])
+      user = User.find(params[:user_id])      
       task = user.tasks.create(task_params)
       task.user = current_user
+      task.attachment = params[:file]
       task.save!
       @response = {:status=>200, :msg=>'task created successfully', :task=>task}
     else
@@ -37,7 +38,6 @@ class TasksController < ApplicationController
 
   def sort
     params[:tasks].each_with_index do |obj, index|
-      #puts "id: #{obj["id"]} and index: #{index}"
       Task.where(:id=>obj["id"]).update_all(:position=>(index+1))
     end
     @response = {:status=>200, :msg=>"tasks have been sorted successfully"}
@@ -54,6 +54,6 @@ class TasksController < ApplicationController
 
   private
   def task_params
-    params.permit(:description,:status,:expiration,{:tags=>[]})
+    params.permit(:description,:status,:expiration,:attachment,{:tags=>[]})
   end
 end

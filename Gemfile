@@ -30,6 +30,7 @@ gem 'awesome_print', "1.1.0"
 gem 'devise'
 gem 'simple_token_authentication', '~> 1.0' # see semver.org
 gem 'pg_search'
+gem 'carrierwave'
 
 group :development do
   gem "rest_client", "1.8.2" 

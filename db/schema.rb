@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20141214034340) do
+ActiveRecord::Schema.define(version: 20141214190241) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -25,6 +25,7 @@ ActiveRecord::Schema.define(version: 20141214034340) do
     t.date     "expiration"
     t.string   "tags",        default: [], array: true
     t.integer  "position"
+    t.string   "attachment"
   end
 
   add_index "tasks", ["tags"], name: "index_tasks_on_tags", using: :gin
