@@ -4,7 +4,6 @@
       <input placeholder="Description" type="text" name="newTask" ng-model="newTask.description" required />
       <input placeholder="Expiration date" ui-date="dateOptions" ng-model="newTask.expDate" />
       <tags-input ng-model="newTask.tags"></tags-input>
-      <input type="file" nv-file-select uploader="uploader"/><br/>
       <input type="file" name="file" onchange="angular.element(this).scope().uploadFile(this.files)"/>
       <ul>
         <li ng-repeat="item in task.uploader.queue">
@@ -30,7 +29,8 @@
         <span ng-show="show"><a href="" ng-click="editing=true;">edit</a></span>
         <span ng-show="show"><a href="" ng-click="deleteTask(task)">delete</a></span>
         <tags-input id="tags{{task.id}}" ng-model="task.tags" on-tag-added="updateTask(task)" on-tag-removed="updateTask(task)"></tags-input>
-        <span ng-if="task.uploader">
+        <span ng-if="task.attachment.url">
+          <img ng-src="{{task.attachment.url}}" />
                 </span>
       </span>
 

@@ -1,6 +1,6 @@
 
 
-angular.module('tasks',['ui.date','ui.sortable','ngTagsInput','angularFileUpload']).
+angular.module('tasks',['ui.date','ui.sortable','ngTagsInput']).
 service('getTasks',function($http){
   $http.defaults.headers.common['X-User-Email'] = 'efren_ce@hotmail.com'; 
   $http.defaults.headers.common['X-User-Token'] = "pwxtcdG515yudzeuAX-m";
@@ -12,8 +12,7 @@ service('getTasks',function($http){
   });
   return promise;
 }).
-controller('mainController',['$scope','$http','getTasks','FileUploader',function($scope,$http,getTasks,FileUploader){
-  $scope.uploader = new FileUploader();
+controller('mainController',['$scope','$http','getTasks',function($scope,$http,getTasks){
   $scope.dateOptions = {
     changeYear: true,
     changeMonth: true,
