@@ -44,6 +44,14 @@ class TasksController < ApplicationController
     json_api_response
   end
 
+  def search
+    user = User.find(params[:user_id])
+    tasks = user.tasks.search_by_description(params[:query])
+    @response = {:status=>200, :tasks=>tasks}
+    json_api_response
+  end
+
+
   private
   def task_params
     params.permit(:description,:status,:expiration,{:tags=>[]})

@@ -34,6 +34,7 @@ controller('mainController',['$scope','$http','getTasks',function($scope,$http,g
     }
   };
   $scope.newTask = {};
+  $scope.query = '';
   getTasks.then(function(data){
     $scope.tasks = data.data.tasks;
     console.log(data);
@@ -72,6 +73,20 @@ controller('mainController',['$scope','$http','getTasks',function($scope,$http,g
           console.log('error');
         }  
       });
+    };
+
+    $scope.search = function(){
+      if($scope.query){
+        var promise = $http.post('/users/1/tasks/search.json',{query:$scope.query},{}).
+        success(function(data){
+          $scope.tasks = data.tasks;
+        });
+      } else {
+        var promise = $http.get('/users/1/tasks.json').
+        success(function(data){
+          $scope.tasks = data.tasks;
+        });
+      }
     };
 
     $scope.clearCompleted = function(){

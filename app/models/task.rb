@@ -1,4 +1,6 @@
 class Task < ActiveRecord::Base
+  include PgSearch
+  pg_search_scope :search_by_description, :against => [:description,:tags]
   belongs_to :user
   before_save :default_values
   scope :default_order, order("position")

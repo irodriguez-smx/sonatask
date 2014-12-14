@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     resources :tasks, :only=>[:create,:destroy,:update,:delete,:index] do
       collection do
         post :sort
+        post :search
       end
     end
   end
