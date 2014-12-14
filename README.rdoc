@@ -1,28 +1,17 @@
-== README
+== Sonatask
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
-
-Things you may want to cover:
+This app was devepment using rails 4 and postgres 9, the app is a proof of concept therefore for the time being it is only configured to run under the development environment as it is not intended to be use in production.
 
 * Ruby version
 
+Ruby version is 2.1.5
+
 * System dependencies
 
-* Configuration
+The frontend part of this app requires bower so node and npm are requirements. Once bower is installed, you will need to cd into the public directory and run `bower install`
 
-* Database creation
+* Database setup
 
-* Database initialization
+for database setup you will need to run both: `rake db:setup` and `rake db:migrate`
 
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
-
-
-Please feel free to use a different markup language if you do not plan to run
-<tt>rake doc:app</tt>.
+License: MIT
