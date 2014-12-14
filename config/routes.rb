@@ -1,7 +1,8 @@
 Rails.application.routes.draw do
   devise_for :users, :controllers => {sessions: 'sessions', registrations: 'registrations'} 
   get 'helper/index'
-  get 'token' => 'helper#token' 
+  post 'token' => 'helper#token'
+  resources :users
   resources :users, :only=>[],:shallow=>true do
     resources :tasks, :only=>[:create,:destroy,:update,:delete,:index] do
       collection do

@@ -1,9 +1,49 @@
 
 
 angular.module('tasks',['ui.date','ui.sortable','ngTagsInput']).
-service('getTasks',function($http){
-  $http.defaults.headers.common['X-User-Email'] = 'efren_ce@hotmail.com'; 
-  $http.defaults.headers.common['X-User-Token'] = "pwxtcdG515yudzeuAX-m";
+factory('session',function(){
+  return {token: null};
+}).
+controller('loginController',['$scope','$http','session',function($scope,$http,session){
+  $scope.action = 'login';
+  $scope.loginOrSignup = function(){
+    $scope[$scope.action]();
+  };
+  $scope.changeAction = function(action){
+    $scope.action = action;
+  };
+  $scope.signup = function(){
+    var promise = $http.post('/users.json',{user: {email: $scope.username, password:$scope.password}},{}).
+    success(function(data){
+      console.log(data);
+      session.id = data.id;
+      session.token = data.authentication_token;
+      session.email = $scope.username;
+      $scope.logged = true;
+      $scope.action = 'login';
+      alert('Signed up successfully');
+    });
+  };
+
+  $scope.login = function(){
+    var promise = $http.post('/token.json',{username: $scope.username, password:$scope.password},{}).
+    success(function(data){
+      console.log(data);
+      if(data.status === 200){
+        session.email = $scope.username;
+        session.token = data.token;
+        $scope.logged =true;
+      }
+    }).
+    error(function(data){
+      alert(data.errors);
+    });
+  };
+  $scope.s
+}]).
+service('getTasks',function($http,session){
+  $http.defaults.headers.common['X-User-Email'] = session.email; 
+  $http.defaults.headers.common['X-User-Token'] = session.token;
 
   var promise = $http.get('/users/1/tasks.json').
   success(function(data){
@@ -12,7 +52,7 @@ service('getTasks',function($http){
   });
   return promise;
 }).
-controller('mainController',['$scope','$http','getTasks',function($scope,$http,getTasks){
+controller('mainController',['$scope','$http','getTasks','session',function($scope,$http,getTasks,session){
   $scope.dateOptions = {
     changeYear: true,
     changeMonth: true,
@@ -69,14 +109,18 @@ controller('mainController',['$scope','$http','getTasks',function($scope,$http,g
       console.log($scope.uploader);
       var fd = new FormData();
       //console.log($scope.uploader);
+      if($scope.newTask.tags) { 
+        $scope.newTask =  _.extend($scope.newTask,{tags: _.pluck($scope.newTask.tags,'text')});
+      }
       var data = {
         'description': $scope.newTask.description,
         'expiration':$scope.newTask.expDate,
-        'tags':_.pluck($scope.newTask.tags,'text'), 
+        'stringifyTags': true,
+        'tags[]': $scope.newTask.tags, 
         'status':false,
         'file':$scope.file
       };
-      _.each(data,function(v,k){ fd.append(k,v); });
+      _.each(data,function(v,k){ if(k === 'tags[]') {v = JSON.stringify(v);} fd.append(k,v); });
       var responsePromise = $http.post('/users/1/tasks.json',fd,{
         transformRequest: angular.identity,
         headers:{'Content-Type':undefined}
@@ -86,6 +130,8 @@ controller('mainController',['$scope','$http','getTasks',function($scope,$http,g
         if(data.status === 200){
           $scope.tasks.push(data.task);
           $scope.newTask = {};
+          var data = {tasks: $scope.tasks};
+          var promise = $http.post('/users/1/tasks/sort.json',data,{});
         } else if(data.status === 400){ // there are validation errors
           console.log('error');
         }  

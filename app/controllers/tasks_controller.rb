@@ -7,6 +7,7 @@ class TasksController < ApplicationController
       user = User.find(params[:user_id])      
       task = user.tasks.create(task_params)
       task.user = current_user
+      task.tags = JSON.parse task.tags[0] if params[:stringifyTags]
       task.attachment = params[:file]
       task.save!
       @response = {:status=>200, :msg=>'task created successfully', :task=>task}
@@ -19,6 +20,10 @@ class TasksController < ApplicationController
   def update
     task =  Task.find(params[:id])
     task.update_attributes(task_params)
+    if params[:file]
+      task.attachment = params[:file]
+      task.save!
+    end
     @response = {:status=>200, :msg=>'task updated successfully',:task=>task}
     json_api_response
   end

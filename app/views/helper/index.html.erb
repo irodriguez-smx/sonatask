@@ -1,40 +1,54 @@
 <div ng-app="tasks">
-  <div ng-controller="mainController">
-    <form name="formTasks" ng-submit="addTask()" >
-      <input placeholder="Description" type="text" name="newTask" ng-model="newTask.description" required />
-      <input placeholder="Expiration date" ui-date="dateOptions" ng-model="newTask.expDate" />
-      <tags-input ng-model="newTask.tags"></tags-input>
-      <input type="file" name="file" onchange="angular.element(this).scope().uploadFile(this.files)"/>
-      <ul>
-        <li ng-repeat="item in task.uploader.queue">
-        Name: <span ng-bind="item.file.name"></span><br/>
-        <button ng-click="item.upload()">upload</button>
+  <div ng-controller="loginController">
+    <span ng-hide="logged">
+      <h1 ng-show="action === 'login'"> Login </h1>
+      <h1 ng-show="action === 'signup'"> Signup </h1>
+      <form  name="loginForm" ng-submit="loginOrSignup()" >
+        <input type="email" ng-model="username" placeholder="username" />
+        <input type="password" ng-model="password" placeholder="password" />
+        <button ng-disabled="loginForm.$invalid">Login</button>
+          <a ng-show="action === 'login'"href="" ng-click="action='signup'">new user?</a>
+          <a ng-show="action === 'signup'"href="" ng-click="action='login'">back to login</a>
+      </form>
+    </span>
+  
+    <div ng-if="logged" ng-controller="mainController">
+      <form name="formTasks" ng-submit="addTask()" >
+        <input placeholder="Description" type="text" name="newTask" ng-model="newTask.description" required />
+        <input placeholder="Expiration date" ui-date="dateOptions" ng-model="newTask.expDate" />
+        <tags-input ng-model="newTask.tags"></tags-input>
+        <input type="file" name="file" onchange="angular.element(this).scope().uploadFile(this.files)"/>
+        <ul>
+          <li ng-repeat="item in task.uploader.queue">
+          Name: <span ng-bind="item.file.name"></span><br/>
+          <button ng-click="item.upload()">upload</button>
+          </li>
+        </ul>
+
+        <button ng-disabled="formTasks.$invalid">Add</button>
+      </form>
+      <button ng-click="clearCompleted()">Clear completed</button>
+      <input placeholder="Search" type="text" ng-enter="search()" ng-model="query" /><button type="button" ng-click="search()">search</button>
+      <ul ui-sortable="sortableOptions" ng-model="tasks">
+        <li ng-repeat="task in tasks"  ng-init="show = false; editing= false"  ng-mouseenter="show=true" ng-mouseleave="show=false; editing=false;updateTask(task)">
+        <input type="checkbox" ng-model="task.status" ng-click="updateTask(task)" ng-checked="task.status" />
+        <span ng-show="editing">
+          <input type="text" ng-enter="editing=false;updateTask(task)" ng-model="task.description" />
+        </span>
+        <span ng-hide="editing">
+          <span ng-class="{'done':task.status}">
+            {{task.description}}
+          </span>
+          <span ng-show="show"><a href="" ng-click="editing=true;">edit</a></span>
+          <span ng-show="show"><a href="" ng-click="deleteTask(task)">delete</a></span>
+          <tags-input id="tags{{task.id}}" ng-model="task.tags" on-tag-added="updateTask(task)" on-tag-removed="updateTask(task)"></tags-input>
+          <span ng-if="task.attachment.url">
+            <img ng-src="{{task.attachment.url}}" />
+                  </span>
+        </span>
+
         </li>
       </ul>
-
-      <button ng-disabled="formTasks.$invalid">Add</button>
-    </form>
-    <button ng-click="clearCompleted()">Clear completed</button>
-    <input placeholder="Search" type="text" ng-enter="search()" ng-model="query" /><button type="button" ng-click="search()">search</button>
-    <ul ui-sortable="sortableOptions" ng-model="tasks">
-      <li ng-repeat="task in tasks"  ng-init="show = false; editing= false"  ng-mouseenter="show=true" ng-mouseleave="show=false; editing=false;updateTask(task)">
-      <input type="checkbox" ng-model="task.status" ng-click="updateTask(task)" ng-checked="task.status" />
-      <span ng-show="editing">
-        <input type="text" ng-enter="editing=false;updateTask(task)" ng-model="task.description" />
-      </span>
-      <span ng-hide="editing">
-        <span ng-class="{'done':task.status}">
-          {{task.description}}
-        </span>
-        <span ng-show="show"><a href="" ng-click="editing=true;">edit</a></span>
-        <span ng-show="show"><a href="" ng-click="deleteTask(task)">delete</a></span>
-        <tags-input id="tags{{task.id}}" ng-model="task.tags" on-tag-added="updateTask(task)" on-tag-removed="updateTask(task)"></tags-input>
-        <span ng-if="task.attachment.url">
-          <img ng-src="{{task.attachment.url}}" />
-                </span>
-      </span>
-
-      </li>
-    </ul>
+    </div>
   </div>
 </div>
