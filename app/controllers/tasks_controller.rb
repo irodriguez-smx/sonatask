@@ -1,64 +1,81 @@
 class TasksController < ApplicationController
-  before_filter :restrict_access, only: [:create]
-  
+  before_filter :restrict_access
+  before_action :find_token, only: [:update, :destroy]
+
   def create
-    description = params[:description]
-    if not description.nil?
-      user = User.find(params[:user_id])      
-      task = user.tasks.create(task_params)
-      task.user = current_user
-      task.tags = JSON.parse task.tags[0] if params[:stringifyTags]
-      task.attachment = params[:file]
-      task.save!
-      @response = {:status=>200, :msg=>'task created successfully', :task=>task}
+    @task = current_user.tasks.new(task_params)
+
+    if @task.save
+      json_api_response(status: 200, object: @task, message: "Task created successfully")
     else
-      @response = {:status=>400, :errors=> 'Not description specified'}
+      json_api_response(status: 400, message: task.errors)
     end
-    json_api_response
   end
 
   def update
-    task =  Task.find(params[:id])
-    task.update_attributes(task_params)
-    if params[:file]
-      task.attachment = params[:file]
-      task.save!
+    if @task.update(task_params)
+      json_api_response(status: 200, object: @task, message: "Task updated sucessfully")
+    else
+      json_api_response(status: 400, message: @task.errors)
     end
-    @response = {:status=>200, :msg=>'task updated successfully',:task=>task}
-    json_api_response
   end
 
   def destroy
-    task = Task.find(params[:id])
-    task.destroy!
-    @response = {:status=>200, :method=>'delete',:msg=>'task has been deleted successfully'}
-    json_api_response
-  end 
+    if @task.destroy
+      json_api_response(status: 200, message: "Task destroyed sucessfully")
+    else
+      json_api_response(status: 400, message: @task.errors)
+    end
+  end
 
   def index
-    user = User.find(params[:user_id])
-    @response = {:status=> 200, :tasks=>user.tasks}
-    json_api_response
+    json_api_response(status: 200, object: current_user.tasks)
   end
 
   def sort
-    params[:tasks].each_with_index do |obj, index|
-      Task.where(:id=>obj["id"]).update_all(:position=>(index+1))
+    unless params[:tasks]
+      json_api_response(status: 400, message: "No tasks param was submitted")
     end
-    @response = {:status=>200, :msg=>"tasks have been sorted successfully"}
-    json_api_response
+
+    ids = params[:tasks].map(&:id)
+    @tasks = current_user.tasks.find(ids)
+
+    unless ids.length == @tasks.length
+      json_api_response(status: 400, message: "Not all tasks submitted for_sort were found")
+    end
+
+    params[:tasks].each_with_index do |obj, index|
+      task = @tasks.find(obj["id"])
+      task.update(:position=>(index+1))
+    end
+
+    json_api_response(status: 200, message: "Successfully sorted tasks")
   end
 
   def search
-    user = User.find(params[:user_id])
-    tasks = user.tasks.search_by_description(params[:query])
-    @response = {:status=>200, :tasks=>tasks}
-    json_api_response
+    unless params[:query]
+      json_api_response(status: 400, message: "No query param was submitted")
+    end
+
+    @tasks = current_user.tasks.search_by_description(params[:query])
+    json_api_response(status: 200, object: @tasks)
   end
 
-
   private
+
+  def find_task
+    @task = current_user.tasks.find(params[:id])
+  end
+
   def task_params
-    params.permit(:description,:status,:expiration,:attachment,{:tags=>[]})
+    params.permit(
+      :description,
+      :status,
+      :expiration,
+      :attachment,
+      {
+        tags: []
+      }
+    )
   end
 end
