@@ -1,16 +1,21 @@
 class User < ActiveRecord::Base
   acts_as_token_authenticatable
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :validatable
+
+  devise(
+    :database_authenticatable,
+    :registerable,
+    :recoverable,
+    :validatable
+  )
 
   has_many :tasks
+
   def self.authenticate(username, password)
-    return nil if username.nil? || password.nil?
+    # this is smelly
+    return nil unless username && password
     user = User.find_for_authentication(:email => username)
-    return nil  if user.nil?
+    return nil unless user
     user.valid_password?(password) ? user : nil
   end
-  
+
 end
