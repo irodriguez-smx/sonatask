@@ -1,26 +1,35 @@
 class ApplicationController < ActionController::Base
   acts_as_token_authentication_handler_for User, fallback_to_devise: false
 
-  # Prevent CSRF attacks by raising an exception.
-  # For APIs, you may want to use :null_session instead.
   protect_from_forgery with: :null_session
 
-  
-  
   def restrict_access
-    if (user = User.where(:authentication_token=> request.headers["X-User-Token"]).first) && (user.email == request.headers["X-User-Email"])
-      true
-    else
-      res = {:error => "Unauthenticated request"}
-      respond_to do |format|      
-        format.json { render json: res, :status => 401 }
-      end
+    unless token = request.headers["X-User-Token"]
+      raise Exception.new("No token provided in headers")
+    end
+
+    unless user = User.find_by(authentication_token: token)
+      raise Exception.new("No user with this token was found")
+    end
+
+    true
+  end
+
+  rescue_from Exception do |exception|
+    error_message = { error: exception.inspect }
+
+    respond_to do |format|
+      format.json { render json: error_message, status: 401 }
     end
   end
 
-  def json_api_response
-    respond_to do |format|
-      format.json { render json: @response, :status => @response[:status] }
+  def json_api_response(response)
+    return respond_to do |format|
+      format.json { render(
+        status: response[:status],
+        json: response[:object],
+        message: response[:message],
+      )}
     end
   end
 end
